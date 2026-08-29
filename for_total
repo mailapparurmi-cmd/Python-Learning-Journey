@@ -1,0 +1,15 @@
+'''
+total=0
+for i in range(3):
+    marks=int(input("enter marks:"))
+    total=total+marks
+print("total marks",total)'''
+
+
+
+total=0
+for i in range(5):
+    numbers=int(input("enter num:"))
+    total=total+numbers
+print("sum:",total  
+ )

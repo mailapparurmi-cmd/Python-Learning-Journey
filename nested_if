@@ -1,0 +1,12 @@
+'''mark=int(input("enter marks"))
+attendance=int(input("enter attendance"))
+if mark>=35:
+    if attendance>=75:
+        print("eligible")
+    else:
+        print("not eligible")'''
+
+
+for i in range(1,3):
+    for j in range(1,4):
+        print(i,j)
