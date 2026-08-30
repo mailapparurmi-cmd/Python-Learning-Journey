@@ -1,0 +1,6 @@
+name="python"
+def learn():
+    topic="Functions"
+    print(name)
+    print(topic)
+learn()

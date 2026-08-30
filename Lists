@@ -1,0 +1,71 @@
+'''fruits = ["Apple","Banana","Mango","Orange"]
+
+print(fruits[0])
+print(fruits[2])
+print(fruits[3])'''
+
+
+'''fruits = ["Apple","Banana","Mango","Orange"]
+fruits[1]="Grapes"
+print(fruits)'''
+
+'''num=[10,20,30,40,50]
+num[2]=300
+print(num)'''
+
+'''fruits = ["Apple","Banana","Mango","Orange"]
+fruits.append("bat")
+print(fruits)'''
+
+'''fruits = ["Apple","Banana","Mango","Orange"]
+fruits.insert(1,"bat")
+print(fruits)'''
+
+'''num=[10,20,40,50]
+num.insert(2,30)
+print(num)'''
+
+'''num=[10,20,40,50]
+num.remove(20)
+print(num)'''
+
+'''num=[10,20,40,50]
+num.pop(2)
+print(num)'''
+
+
+'''num=[10,20,40,50]
+removed=num.pop(2)
+print(removed)'''
+
+'''num=[10,20,40,50]
+print(len(num))'''
+
+'''num=[10,20,40,50]
+print(num[0:2])'''
+
+'''num=[10,20,30,40,50]
+print(num[1:4])'''
+
+'''fruits = ["Apple","Banana","Mango","Orange"]
+print(fruits[-2])'''
+
+'''num=[10,20,30,40,50]
+print(num[0:5:2])'''
+
+'''fruits = ["Apple","Banana","Mango","Orange"]
+
+for fruit in fruits:
+    print(fruit)'''
+
+
+'''numbers=[10,20,30,40,50]
+
+for number in numbers:
+    print(number)'''
+
+numbers=[10,20,30,40,50]
+
+for number in numbers:
+    if number>=30:
+       print(number)

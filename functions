@@ -1,0 +1,74 @@
+'''def greet():
+    print("Heloo")
+greet()'''
+
+
+
+'''def welcome():
+    print("welcomee to my python learning journy")
+welcome()'''
+
+'''def student(name,age):
+    print("Hello",name,"your are",age,"years old")
+student("mailappa",20)'''
+
+
+'''def square(number):
+    return number*number
+result=square(9)
+print(result)'''
+
+
+ 
+'''def student(name,marks):
+    if marks>=35:
+        return "pass"
+    else:
+        return "fail"
+result=student("mailappa",34)
+print(result)'''
+
+'''def student(name,age=20,marks=36):
+    if marks>=35:
+        return "pass"
+    else:
+        return "fail"
+result=student("mailappa" )
+print(result)'''
+
+
+
+'''def total_marks(*marks):
+    total=0
+    for mark in marks:
+        total=total+mark
+    return total
+result=total_marks(10,20,30,40)
+print(result)'''
+
+
+'''def sum_numbers(*numbers):
+    sum=0
+    for number in numbers:
+        sum=sum+number
+    return sum
+result=sum_numbers(10,20,30,40)
+print(result)'''
+
+
+'''def student(**details):
+    print(details)
+student(name="mailappa",age=20,branch="cse")'''
+
+
+'''def student(**details):
+    print(details["name"])
+    print(details["age"])
+student(name="mailappa",age=20)'''
+
+
+def student(name,*subjects,**details):
+    print("Name",name)
+    print("Subjects",subjects)
+    print("details",details)
+student("Mailappa","maths","dbms","ms",age=20,marks=25)
