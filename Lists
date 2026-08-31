@@ -64,8 +64,110 @@ for fruit in fruits:
 for number in numbers:
     print(number)'''
 
-numbers=[10,20,30,40,50]
+'''numbers=[10,20,30,40,50]
 
 for number in numbers:
     if number>=30:
-       print(number)
+       print(number)'''
+
+'''numbers=[25,40,55,30,75,20]
+for number in numbers:
+    if number>=35:
+        print(number)'''
+
+'''numbers=[10,20,30,40,50]
+print(30 in numbers)''' 
+
+'''numbers=[20,10,40,30,50]
+numbers.sort()
+print(numbers )--for also strings'''
+    
+     
+'''numbers=[20,10,40,30,50]
+numbers.reverse()
+print(numbers)'''
+
+'''numbers=[20,10,40,30,10,50,10]
+print(numbers.count(10))'''
+
+'''numbers=[20,10,40,30,50]
+print(numbers.index(10))'''
+
+'''a=[10,20,30]
+b=[40,50]
+a.extend(b)
+print(a)'''
+
+'''numbers=[10,20,30]
+new_numbers=numbers.copy()
+print(new_numbers)'''
+
+
+'''a=[10,20,30]
+b=a
+b.append(40)
+print(b)'''
+
+
+'''a=[10,20,30,]
+a.clear()
+print(a)'''
+
+'''numbers=[10,20,30]
+del numbers[1]
+print(numbers)'''
+
+'''numbers=[10,20,30]
+del numbers'''
+
+#Final practice of list
+
+'''a=[1,2]
+a.append([3,4])
+
+b=[5,6]
+a.extend(b)
+print(a)'''
+
+
+'''numbers=[30,10,50,20,40]
+numbers.sort()
+numbers.reverse()
+print(numbers)'''
+
+'''numbers=[10,20,10,30,10,40]
+print(numbers.count(10))
+print(numbers.index(30))'''
+
+
+'''a=[10,20,30,40]
+b=a.copy()
+b.pop()
+print(a)
+print(b)'''
+
+'''numbers=[5,10,15,10,20,25]
+numbers.remove(10)
+numbers.append(30)
+numbers.sort()
+print(numbers)'''
+
+
+
+#with all before concepts:
+
+
+students=["Ravi","Anil","Kiran","Ravi","Bhanu"]
+students.append("Meena")
+students.insert(1,"Arun")
+print(students.count("Ravi"))
+print(students.index("Kiran"))
+print("Bhanu" in students)
+students.remove("Ravi")
+students.extend(["Sita","Mohan"])
+students.sort()
+students.reverse()
+students_copy=students.copy()
+students_copy.pop()
+print(students)
+print(students_copy)
