@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Dashboard - Smart Attendance</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; }
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .navbar-left { display: flex; align-items: center; gap: 15px; }
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .logout-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            padding: 8px 20px;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+        }
+        .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
+        .welcome-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .stat-card .number { font-size: 32px; font-weight: bold; color: #667eea; }
+        .calendar-section {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .month-selector {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .month-selector button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .calendar {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .calendar th, .calendar td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+        .calendar th { background: #667eea; color: white; }
+        .present { background: #d4edda; color: #155724; }
+        .absent { background: #f8d7da; color: #721c24; }
+        .no-class { background: #f5f5f5; color: #999; }
+        .subjects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .subject-card {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border-left: 4px solid #667eea;
+        }
+        .progress-bar {
+            background: #e0e0e0;
+            border-radius: 10px;
+            height: 8px;
+            margin: 10px 0;
+        }
+        .progress-fill { height: 100%; border-radius: 10px; width: 0%; }
+        .good { color: #27ae60; }
+        .warning { color: #f39c12; }
+        .danger { color: #e74c3c; }
+        .fill-good { background: #27ae60; }
+        .fill-warning { background: #f39c12; }
+        .fill-danger { background: #e74c3c; }
+        
+        @media (max-width: 768px) {
+            .stats { grid-template-columns: repeat(2, 1fr); }
+            .subjects-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="navbar-left">
+            <button class="back-btn" onclick="window.location.href='index.html'">← Back</button>
+            <h2>📱 Student Dashboard</h2>
+        </div>
+        <button class="logout-btn" onclick="logout()">🚪 Logout</button>
+    </div>
+    <div class="container">
+        <div class="welcome-card">
+            <h2>Welcome, <span id="studentName">Student</span>! 👋</h2>
+            <p>Track your attendance and view your calendar</p>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-card"><h4>📚 Total Subjects</h4><div class="number" id="totalSubjects">0</div></div>
+            <div class="stat-card"><h4>✅ Classes Attended</h4><div class="number" id="totalAttended">0</div></div>
+            <div class="stat-card"><h4>📖 Overall %</h4><div class="number" id="overallPercent">0%</div></div>
+        </div>
+        
+        <div class="calendar-section">
+            <h3>📅 Attendance Calendar</h3>
+            <div class="month-selector">
+                <button onclick="changeMonth(-1)">◀ Prev</button>
+                <h4 id="monthYear"></h4>
+                <button onclick="changeMonth(1)">Next ▶</button>
+            </div>
+            <div id="calendarContainer">Loading calendar...</div>
+        </div>
+        
+        <h3>📚 Subject-wise Attendance</h3>
+        <div id="subjectsContainer">Loading...</div>
+    </div>
+
+    <script>
+        const student = JSON.parse(localStorage.getItem('student'));
+        if(!student) window.location.href = 'student-login.html';
+        
+        document.getElementById('studentName').innerText = student.name;
+        let currentDate = new Date();
+        
+        async function loadDashboard() {
+            try {
+                const subjectsRes = await fetch('http://localhost:5000/api/subjects');
+                const subjects = await subjectsRes.json();
+                document.getElementById('totalSubjects').innerText = subjects.length;
+                
+                const attRes = await fetch(`http://localhost:5000/api/attendance-percentage/${student.student_id}`);
+                const attendanceData = await attRes.json();
+                
+                let totalAttended = 0, totalClasses = 0;
+                const container = document.getElementById('subjectsContainer');
+                container.innerHTML = '';
+                
+                subjects.forEach(subject => {
+                    const attInfo = attendanceData.find(a => a.subject_id === subject.subject_id) || { percentage: 0, total_classes: 0, present_count: 0 };
+                    totalAttended += attInfo.present_count || 0;
+                    totalClasses += attInfo.total_classes || 0;
+                    
+                    let percentClass = attInfo.percentage >= 75 ? 'good' : (attInfo.percentage >= 60 ? 'warning' : 'danger');
+                    let fillClass = attInfo.percentage >= 75 ? 'fill-good' : (attInfo.percentage >= 60 ? 'fill-warning' : 'fill-danger');
+                    
+                    container.innerHTML += `
+                        <div class="subject-card">
+                            <h3>${subject.name}</h3>
+                            <div>Code: ${subject.code}</div>
+                            <div class="${percentClass}" style="font-size:28px;font-weight:bold;margin:10px 0;">${attInfo.percentage || 0}%</div>
+                            <div class="progress-bar"><div class="progress-fill ${fillClass}" style="width: ${attInfo.percentage || 0}%"></div></div>
+                            <div style="margin-top:10px;">
+                                <div>📊 Total Classes: ${attInfo.total_classes || 0}</div>
+                                <div>✅ Attended: ${attInfo.present_count || 0}</div>
+                                <div>❌ Missed: ${(attInfo.total_classes || 0) - (attInfo.present_count || 0)}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                const overallPercent = totalClasses > 0 ? ((totalAttended / totalClasses) * 100).toFixed(2) : 0;
+                document.getElementById('totalAttended').innerText = totalAttended;
+                document.getElementById('overallPercent').innerHTML = overallPercent + '%';
+                loadCalendar();
+            } catch(e) { console.error(e); }
+        }
+        
+        async function loadCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            document.getElementById('monthYear').innerHTML = currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+            
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const startDate = `${year}-${String(month+1).padStart(2,'0')}-01`;
+            const endDate = `${year}-${String(month+1).padStart(2,'0')}-${daysInMonth}`;
+            
+            try {
+                const response = await fetch('http://localhost:5000/api/attendance-by-date', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ student_id: student.student_id, start_date: startDate, end_date: endDate })
+                });
+                const records = await response.json();
+                const recordMap = {};
+                records.forEach(r => { recordMap[r.date] = r.status; });
+                
+                let html = '<table class="calendar"><tr>';
+                ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].forEach(day => html += `<th>${day}</th>`);
+                html += '</tr></thead><tbody><tr>';
+                
+                for(let i = 0; i < firstDay; i++) html += '<td class="no-class">-</td>';
+                for(let day = 1; day <= daysInMonth; day++) {
+                    const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+                    const status = recordMap[dateStr];
+                    let cellClass = 'no-class', statusText = '-';
+                    if(status === 'present') { cellClass = 'present'; statusText = '✓'; }
+                    else if(status === 'absent') { cellClass = 'absent'; statusText = '✗'; }
+                    html += `<td class="${cellClass}">${day}<br><small>${statusText}</small></td>`;
+                    if((firstDay + day) % 7 === 0) html += '<tr>';
+                }
+                const lastDay = new Date(year, month + 1, 0).getDay();
+                for(let i = lastDay; i < 6; i++) html += '<td class="no-class">-</td>';
+                html += '</tr></tbody></table>';
+                document.getElementById('calendarContainer').innerHTML = html;
+            } catch(e) { document.getElementById('calendarContainer').innerHTML = '<div class="error-message">❌ Error loading calendar</div>'; }
+        }
+        
+        function changeMonth(direction) {
+            currentDate.setMonth(currentDate.getMonth() + direction);
+            loadCalendar();
+        }
+        
+        function logout() { localStorage.removeItem('student'); window.location.href = 'index.html'; }
+        
+        loadDashboard();
+    </script>
+</body>
+</html>

@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teacher Signup - Smart Attendance System</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #27ae60 0%, #219a52 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            width: 550px;
+            max-width: 100%;
+        }
+        h2 { text-align: center; margin-bottom: 5px; color: #333; }
+        .subtitle { text-align: center; color: #666; font-size: 12px; margin-bottom: 25px; }
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+        .row {
+            display: flex;
+            gap: 15px;
+        }
+        .row > div {
+            flex: 1;
+        }
+        button {
+            width: 100%;
+            padding: 14px;
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 15px;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        button:hover { background: #219a52; }
+        .success { background: #d4edda; color: #155724; padding: 10px; border-radius: 8px; text-align: center; margin-top: 15px; }
+        .error { background: #f8d7da; color: #721c24; padding: 10px; border-radius: 8px; text-align: center; margin-top: 15px; }
+        .info { background: #d1ecf1; color: #0c5460; padding: 10px; border-radius: 8px; text-align: center; margin-top: 15px; }
+        .link { text-align: center; margin-top: 15px; }
+        .link a { color: #27ae60; text-decoration: none; }
+        .required:after {
+            content: " *";
+            color: red;
+        }
+        .subject-note {
+            font-size: 11px;
+            color: #666;
+            margin-top: -5px;
+            margin-bottom: 10px;
+        }
+        .new-subject-input {
+            display: none;
+        }
+        .new-subject-input.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>👨‍🏫 Teacher Registration</h2>
+        <p class="subtitle">Register to become a teacher - Admin will verify your account</p>
+        
+        <div class="row">
+            <div>
+                <label class="required">Full Name</label>
+                <input type="text" id="name" placeholder="Enter your full name">
+            </div>
+            <div>
+                <label class="required">Email</label>
+                <input type="email" id="email" placeholder="teacher@example.com">
+            </div>
+        </div>
+        
+        <div class="row">
+            <div>
+                <label class="required">Password</label>
+                <input type="password" id="password" placeholder="Create password">
+            </div>
+            <div>
+                <label class="required">Confirm Password</label>
+                <input type="password" id="confirmPassword" placeholder="Confirm password">
+            </div>
+        </div>
+        
+        <div class="row">
+            <div>
+                <label class="required">Select Subject</label>
+                <select id="subjectSelect">
+                    <option value="">-- Select Subject --</option>
+                    <option value="new">+ Add New Subject</option>
+                </select>
+                <div class="subject-note">Select a subject or choose "+ Add New Subject"</div>
+            </div>
+            <div>
+                <label>Years of Experience</label>
+                <input type="number" id="experience" placeholder="Years" min="0" max="50">
+            </div>
+        </div>
+        
+        <div id="newSubjectContainer" class="new-subject-input">
+            <label class="required">New Subject Name</label>
+            <input type="text" id="newSubject" placeholder="Enter new subject name (e.g., Physics, Chemistry)">
+        </div>
+        
+        <div class="row">
+            <div>
+                <label>Qualification</label>
+                <input type="text" id="qualification" placeholder="e.g., M.Sc, B.E, Ph.D">
+            </div>
+            <div>
+                <label>Phone Number</label>
+                <input type="tel" id="phone" placeholder="Mobile number">
+            </div>
+        </div>
+        
+        <label>Address (Optional)</label>
+        <textarea id="address" placeholder="Your address"></textarea>
+        
+        <button onclick="teacherSignup()">📝 Register as Teacher</button>
+        
+        <div class="link">
+            <a href="teacher-login.html">← Already have an account? Login here</a>
+        </div>
+        <div class="link">
+            <a href="index.html">← Back to Home</a>
+        </div>
+        <div id="message"></div>
+    </div>
+
+    <script>
+        // Show/hide new subject input based on selection
+        document.getElementById('subjectSelect').addEventListener('change', function() {
+            const newSubjectDiv = document.getElementById('newSubjectContainer');
+            if (this.value === 'new') {
+                newSubjectDiv.classList.add('show');
+            } else {
+                newSubjectDiv.classList.remove('show');
+            }
+        });
+        
+        // Load existing subjects for dropdown
+        async function loadSubjects() {
+            try {
+                const response = await fetch('http://localhost:5000/api/all-subjects');
+                const subjects = await response.json();
+                const select = document.getElementById('subjectSelect');
+                
+                // Clear existing options except first
+                while (select.options.length > 1) {
+                    select.remove(1);
+                }
+                
+                subjects.forEach(subject => {
+                    const option = document.createElement('option');
+                    option.value = subject.subject_id;
+                    option.textContent = `${subject.name} (${subject.code})`;
+                    select.appendChild(option);
+                });
+                
+                // Add the "Add New" option at the end
+                const newOption = document.createElement('option');
+                newOption.value = 'new';
+                newOption.textContent = '+ Add New Subject';
+                select.appendChild(newOption);
+                
+            } catch (error) {
+                console.error('Error loading subjects:', error);
+            }
+        }
+        
+        async function teacherSignup() {
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const subjectValue = document.getElementById('subjectSelect').value;
+            const newSubjectName = document.getElementById('newSubject').value.trim();
+            const qualification = document.getElementById('qualification').value;
+            const experience = document.getElementById('experience').value || 0;
+            const phone = document.getElementById('phone').value;
+            const address = document.getElementById('address').value;
+            
+            // Validation
+            if (!name || !email || !password) {
+                showMessage('❌ Please fill all required fields', 'error');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                showMessage('❌ Passwords do not match', 'error');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showMessage('❌ Password must be at least 6 characters', 'error');
+                return;
+            }
+            
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showMessage('❌ Please enter a valid email address', 'error');
+                return;
+            }
+            
+            // Subject validation
+            let subjectId = null;
+            let isNewSubject = false;
+            
+            if (subjectValue === 'new') {
+                if (!newSubjectName) {
+                    showMessage('❌ Please enter the new subject name', 'error');
+                    return;
+                }
+                isNewSubject = true;
+            } else if (subjectValue && subjectValue !== '') {
+                subjectId = parseInt(subjectValue);
+            } else {
+                showMessage('❌ Please select or add a subject', 'error');
+                return;
+            }
+            
+            showMessage('⏳ Registering... Please wait', 'info');
+            
+            try {
+                const requestBody = {
+                    name: name,
+                    email: email,
+                    password: password,
+                    qualification: qualification,
+                    experience: experience,
+                    phone: phone,
+                    address: address
+                };
+                
+                if (isNewSubject) {
+                    requestBody.new_subject = newSubjectName;
+                } else {
+                    requestBody.subject_name = subjectId;
+                }
+                
+                const response = await fetch('http://localhost:5000/api/teacher/signup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestBody)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showMessage(`
+                        ✅ ${data.message}<br><br>
+                        📋 Your application is pending admin approval.<br>
+                        You will receive access once approved.<br><br>
+                        Redirecting to login page...
+                    `, 'success');
+                    
+                    setTimeout(() => {
+                        window.location.href = 'teacher-login.html';
+                    }, 4000);
+                } else {
+                    showMessage('❌ ' + data.message, 'error');
+                }
+            } catch (error) {
+                showMessage('❌ Network error. Make sure server is running.', 'error');
+            }
+        }
+        
+        function showMessage(msg, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.innerHTML = `<div class="${type}">${msg}</div>`;
+            messageDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        loadSubjects();
+    </script>
+</body>
+</html>

@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Signup - Smart Attendance</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            width: 500px;
+            max-width: 100%;
+        }
+        h2 { text-align: center; margin-bottom: 5px; color: #333; }
+        .subtitle { text-align: center; color: #666; font-size: 12px; margin-bottom: 25px; }
+        input, select {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .row { display: flex; gap: 15px; }
+        .row > div { flex: 1; }
+        
+        .photo-section {
+            text-align: center;
+            margin: 15px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        .photo-preview {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            overflow: hidden;
+            border: 3px solid #667eea;
+            cursor: pointer;
+        }
+        .photo-preview img { width: 100%; height: 100%; object-fit: cover; }
+        .photo-preview .placeholder { font-size: 40px; color: #999; }
+        .photo-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        .photo-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .photo-btn-danger { background: #e74c3c; }
+        .signup-btn {
+            width: 100%;
+            padding: 14px;
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 15px;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .signup-btn:hover { background: #219a52; }
+        .back-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-bottom: 15px;
+            display: inline-block;
+        }
+        .success { background: #d4edda; color: #155724; padding: 10px; border-radius: 8px; text-align: center; margin-top: 15px; }
+        .error { background: #f8d7da; color: #721c24; padding: 10px; border-radius: 8px; text-align: center; margin-top: 15px; }
+        .info { background: #d1ecf1; color: #0c5460; padding: 10px; border-radius: 8px; text-align: center; margin-top: 15px; }
+        .link { text-align: center; margin-top: 15px; }
+        .link a { color: #667eea; text-decoration: none; }
+        .required:after { content: " *"; color: red; }
+        
+        @media (max-width: 480px) { .row { flex-direction: column; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="back-btn" onclick="window.location.href='index.html'">← Back</button>
+        
+        <h2>📝 Student Registration</h2>
+        <p class="subtitle">Create your account with photo verification</p>
+        
+        <div class="row">
+            <div><label class="required">Full Name</label><input type="text" id="name" placeholder="Enter your full name"></div>
+            <div><label class="required">Email</label><input type="email" id="email" placeholder="your@email.com"></div>
+        </div>
+        
+        <div class="row">
+            <div><label class="required">Password</label><input type="password" id="password" placeholder="Create password"></div>
+            <div><label class="required">Confirm Password</label><input type="password" id="confirmPassword" placeholder="Confirm password"></div>
+        </div>
+        
+        <div class="row">
+            <div><label class="required">Select Branch/Class</label>
+                <select id="branchId">
+                    <option value="">-- Select Branch --</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="photo-section">
+            <div class="photo-preview" id="photoPreview" onclick="document.getElementById('photoInput').click()">
+                <div class="placeholder">📷</div>
+            </div>
+            <div class="photo-buttons">
+                <button type="button" class="photo-btn" onclick="document.getElementById('photoInput').click()">📸 Select Photo</button>
+                <button type="button" class="photo-btn photo-btn-danger" onclick="removePhoto()">🗑 Remove</button>
+            </div>
+            <input type="file" id="photoInput" accept="image/jpeg,image/png,image/jpg" style="display:none">
+            <div style="font-size: 11px; color: #666; margin-top: 8px;">
+                Upload a clear face photo (JPG, PNG, max 5MB)
+            </div>
+        </div>
+        
+        <button class="signup-btn" onclick="signup()">📝 Create Account</button>
+        
+        <div class="link"><a href="student-login.html">Already have an account? Login</a></div>
+        <div id="message"></div>
+    </div>
+
+    <script>
+        let selectedFile = null;
+        
+        async function loadBranches() {
+            try {
+                const response = await fetch('http://localhost:5000/api/branches');
+                const branches = await response.json();
+                const select = document.getElementById('branchId');
+                select.innerHTML = '<option value="">-- Select Branch --</option>';
+                branches.forEach(branch => {
+                    const option = document.createElement('option');
+                    option.value = branch.branch_id;
+                    option.textContent = `${branch.name} (${branch.code})`;
+                    select.appendChild(option);
+                });
+            } catch(error) {
+                console.error('Error loading branches:', error);
+                document.getElementById('branchId').innerHTML = '<option value="">-- Error loading branches --</option>';
+            }
+        }
+        
+        document.getElementById('photoInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                if (!file.type.startsWith('image/')) {
+                    alert('Please select an image file');
+                    return;
+                }
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('File size must be less than 5MB');
+                    return;
+                }
+                selectedFile = file;
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                    document.getElementById('photoPreview').innerHTML = '<img src="' + ev.target.result + '" alt="Preview">';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        function removePhoto() {
+            selectedFile = null;
+            document.getElementById('photoInput').value = '';
+            document.getElementById('photoPreview').innerHTML = '<div class="placeholder">📷</div>';
+        }
+        
+        async function signup() {
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const confirm = document.getElementById('confirmPassword').value;
+            const branchId = document.getElementById('branchId').value;
+            
+            if (!name || !email || !password) {
+                showMessage('❌ Please fill all fields', 'error');
+                return;
+            }
+            if (password !== confirm) {
+                showMessage('❌ Passwords do not match', 'error');
+                return;
+            }
+            if (password.length < 6) {
+                showMessage('❌ Password must be at least 6 characters', 'error');
+                return;
+            }
+            if (!branchId) {
+                showMessage('❌ Please select your branch/class', 'error');
+                return;
+            }
+            if (!selectedFile) {
+                showMessage('❌ Please upload a photo', 'error');
+                return;
+            }
+            
+            showMessage('⏳ Creating account...', 'info');
+            
+            try {
+                const signupRes = await fetch('http://localhost:5000/api/signup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, password, branch_id: branchId })
+                });
+                const signupData = await signupRes.json();
+                
+                if (!signupData.success) {
+                    showMessage('❌ ' + signupData.error, 'error');
+                    return;
+                }
+                
+                const studentId = signupData.student_id;
+                const formData = new FormData();
+                formData.append('photo', selectedFile);
+                formData.append('student_id', studentId);
+                
+                const photoRes = await fetch('http://localhost:5000/api/upload-photo', {
+                    method: 'POST',
+                    body: formData
+                });
+                const photoData = await photoRes.json();
+                
+                if (photoData.success) {
+                    showMessage('✅ Account created! Photo uploaded. Waiting for admin approval.', 'success');
+                    setTimeout(() => window.location.href = 'student-login.html', 3000);
+                } else {
+                    showMessage('❌ ' + photoData.message, 'error');
+                }
+            } catch(error) {
+                showMessage('❌ Network error: ' + error.message, 'error');
+            }
+        }
+        
+        function showMessage(msg, type) {
+            const msgDiv = document.getElementById('message');
+            msgDiv.innerHTML = '<div class="' + type + '">' + msg + '</div>';
+            setTimeout(() => {
+                if (msgDiv.innerHTML === '<div class="' + type + '">' + msg + '</div>') {
+                    msgDiv.innerHTML = '';
+                }
+            }, 5000);
+        }
+        
+        loadBranches();
+    </script>
+</body>
+</html>

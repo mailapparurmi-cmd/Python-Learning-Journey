@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teacher Dashboard - Face Recognition</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f0f2f5;
+            padding-bottom: 60px;
+        }
+        .navbar {
+            background: linear-gradient(135deg, #27ae60 0%, #219a52 100%);
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        .navbar h2 { font-size: 18px; }
+        .logout-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            padding: 8px 20px;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        .subject-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .subject-card h3 { color: #27ae60; margin-bottom: 5px; }
+        .section {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .section h3 {
+            margin-bottom: 15px;
+            border-left: 4px solid #27ae60;
+            padding-left: 12px;
+            color: #333;
+        }
+        .date-row {
+            display: flex;
+            gap: 15px;
+            align-items: flex-end;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .date-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .date-group label {
+            font-size: 12px;
+            color: #666;
+            font-weight: bold;
+        }
+        .date-group input, .date-group select {
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn:hover { background: #219a52; }
+        
+        .upload-area {
+            border: 2px dashed #3498db;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: 0.3s;
+        }
+        .upload-area:hover { background: #e8f4fd; }
+        .upload-icon { font-size: 48px; margin-bottom: 10px; }
+        .file-list { margin-top: 15px; max-height: 200px; overflow-y: auto; }
+        .file-item {
+            background: #f8f9fa;
+            padding: 8px 12px;
+            margin: 5px 0;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .remove-file {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 2px 8px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .process-btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 15px;
+        }
+        .process-btn:disabled { background: #ccc; cursor: not-allowed; }
+        .progress-container { margin-top: 15px; display: none; }
+        .progress-bar {
+            background: #e0e0e0;
+            border-radius: 10px;
+            height: 20px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            background: #27ae60;
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 11px;
+        }
+        .batch-result { margin-top: 15px; max-height: 300px; overflow-y: auto; }
+        .result-item {
+            padding: 8px;
+            margin: 5px 0;
+            border-radius: 5px;
+            font-size: 13px;
+        }
+        .result-success { background: #d4edda; color: #155724; border-left: 4px solid #27ae60; }
+        .result-error { background: #f8d7da; color: #721c24; border-left: 4px solid #e74c3c; }
+        
+        .photo-preview { max-width: 100%; border-radius: 10px; margin-top: 15px; border: 2px solid #27ae60; }
+        .success-message { background: #d4edda; color: #155724; padding: 15px; border-radius: 8px; margin-top: 15px; text-align: center; }
+        .error-message { background: #f8d7da; color: #721c24; padding: 15px; border-radius: 8px; margin-top: 15px; text-align: center; }
+        .info-message { background: #d1ecf1; color: #0c5460; padding: 10px; border-radius: 8px; margin-top: 10px; text-align: center; }
+        
+        .table-responsive { overflow-x: auto; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background: #27ae60; color: white; font-weight: bold; }
+        tr:hover { background: #f5f5f5; }
+        .present { color: #27ae60; font-weight: bold; }
+        .absent { color: #e74c3c; font-weight: bold; }
+        
+        .search-bar {
+            margin-bottom: 15px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .search-bar input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .student-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .present-btn { background: #27ae60; color: white; border: none; padding: 5px 15px; border-radius: 5px; cursor: pointer; }
+        .absent-btn { background: #e74c3c; color: white; border: none; padding: 5px 15px; border-radius: 5px; cursor: pointer; }
+        .time-badge {
+            display: inline-block;
+            background: #e8f4fd;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            color: #2980b9;
+        }
+        
+        .photo-card {
+            background: white;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .photo-card-image {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        .photo-card-details { flex: 1; }
+        .photo-card-details p { margin: 5px 0; }
+        .photo-card-details strong { color: #27ae60; }
+        .photo-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            margin-left: 10px;
+        }
+        .badge-success { background: #d4edda; color: #155724; }
+        .badge-warning { background: #ffc107; color: #856404; }
+        .badge-danger { background: #f8d7da; color: #721c24; }
+        .photo-confidence { font-size: 18px; font-weight: bold; }
+        .confidence-high { color: #27ae60; }
+        .confidence-medium { color: #f39c12; }
+        .confidence-low { color: #e74c3c; }
+        
+        .tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            border-bottom: 1px solid #ddd;
+        }
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            color: #666;
+            border-radius: 5px 5px 0 0;
+        }
+        .tab-btn.active {
+            color: #27ae60;
+            border-bottom: 3px solid #27ae60;
+            background: #e8f8f0;
+        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px;
+            border-top: 1px solid #ddd;
+            z-index: 100;
+        }
+        .bottom-nav-btn {
+            background: none;
+            border: none;
+            padding: 8px 20px;
+            font-size: 14px;
+            cursor: pointer;
+            color: #27ae60;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 768px) {
+            .tab-btn { padding: 8px 12px; font-size: 12px; }
+            .navbar-left h2 { font-size: 14px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="navbar-left">
+            <button class="back-btn" onclick="goBack()">← Back</button>
+            <h2>👨‍🏫 Teacher Dashboard</h2>
+        </div>
+        <button class="logout-btn" onclick="logout()">🚪 Logout</button>
+    </div>
+    <div class="container">
+        <div class="subject-card">
+            <h3>📚 Your Subject: <span id="subjectName">Loading...</span></h3>
+            <p>Code: <span id="subjectCode"></span></p>
+        </div>
+        
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="showTab('attendance', this)">📸 Attendance</button>
+            <button class="tab-btn" onclick="showTab('manual', this)">✍️ Manual</button>
+            <button class="tab-btn" onclick="showTab('logins', this)">👥 Student Logins</button>
+            <button class="tab-btn" onclick="showTab('photos', this)">🖼️ Photo History</button>
+            <button class="tab-btn" onclick="showTab('reports', this)">📊 Reports</button>
+        </div>
+        
+        <!-- TAB 1: Attendance -->
+        <div id="tab-attendance" class="tab-content active">
+            <div class="section">
+                <h3>📸 Date-Wise Multiple Photos Upload (Face Recognition)</h3>
+                <div class="date-row">
+                    <div class="date-group"><label>📅 Select Date</label><input type="date" id="photoUploadDate"></div>
+                    <div class="date-group">
+                        <label>🕐 Select Class Time</label>
+                        <select id="photoClassTime">
+                            <option value="09:00:00">09:00 AM - Morning Class</option>
+                            <option value="11:00:00">11:00 AM - Late Morning</option>
+                            <option value="14:00:00">02:00 PM - Afternoon Class</option>
+                            <option value="15:00:00">03:00 PM - Evening Class</option>
+                            <option value="custom">Custom Time</option>
+                        </select>
+                    </div>
+                    <div class="date-group" id="customTimeDiv" style="display:none;"><label>⏰ Custom Time</label><input type="time" id="customTime" step="1"></div>
+                </div>
+                <div class="upload-area" id="uploadArea" onclick="document.getElementById('multiplePhotos').click()">
+                    <div class="upload-icon">📷📷📷</div>
+                    <div>Click or Drag & Drop multiple photos</div>
+                </div>
+                <input type="file" id="multiplePhotos" accept="image/jpeg,image/png,image/jpg" multiple style="display:none" onchange="handleFileSelect(this.files)">
+                <div id="fileListContainer" class="file-list"></div>
+                <button class="process-btn" id="processBtn" onclick="processAllPhotos()" disabled>📊 Process All Photos</button>
+                <div id="progressContainer" class="progress-container"><div class="progress-bar"><div class="progress-fill" id="progressFill">0%</div></div></div>
+                <div id="batchResultContainer" class="batch-result"></div>
+            </div>
+            
+            <div class="section">
+                <h3>📋 View Attendance by Date</h3>
+                <div class="date-row">
+                    <div class="date-group"><label>📅 Select Date</label><input type="date" id="viewDate"></div>
+                    <button class="btn" onclick="loadAttendanceByDate()">🔍 View Attendance</button>
+                </div>
+                <div class="search-bar"><input type="text" id="attendanceSearch" placeholder="🔍 Search by student name..." onkeyup="filterAttendanceTable()"></div>
+                <div id="dateAttendanceResult"><div class="info-message">Select a date and click "View Attendance"</div></div>
+            </div>
+        </div>
+        
+        <!-- TAB 2: Manual Attendance -->
+        <div id="tab-manual" class="tab-content">
+            <div class="section">
+                <h3>✍️ Date-Wise Manual Attendance</h3>
+                <div class="date-row">
+                    <div class="date-group"><label>📅 Select Date</label><input type="date" id="manualAttendanceDate"></div>
+                    <button class="btn" onclick="loadStudentsForDate()">📋 Load Students</button>
+                </div>
+                <div id="studentsList">Select date, then click Load Students</div>
+            </div>
+        </div>
+        
+        <!-- TAB 3: Student Login List -->
+        <div id="tab-logins" class="tab-content">
+            <div class="section">
+                <h3>👥 Student Login List</h3>
+                <div id="loginSummaryContainer" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                    <div class="info-message">Loading summary...</div>
+                </div>
+                <div class="search-bar">
+                    <input type="text" id="loginSearch" placeholder="🔍 Search by student name..." onkeyup="filterLoginTable()">
+                    <select id="loginDateFilter" onchange="filterLoginTable()">
+                        <option value="all">All Dates</option>
+                        <option value="today">Today</option>
+                        <option value="yesterday">Yesterday</option>
+                        <option value="week">Last 7 Days</option>
+                    </select>
+                    <button class="btn" onclick="loadLoginHistory()">🔄 Refresh</button>
+                </div>
+                <div id="loginHistoryResult"><div class="info-message">Click Refresh to load login history</div></div>
+            </div>
+        </div>
+        
+        <!-- TAB 4: Photo History -->
+        <div id="tab-photos" class="tab-content">
+            <div class="section">
+                <h3>🖼️ Uploaded Photos History</h3>
+                <div class="date-row">
+                    <div class="date-group"><label>📅 Filter by Date</label><input type="date" id="photoFilterDate"></div>
+                    <div class="date-group"><label>🔍 Search by Student</label><input type="text" id="photoSearch" placeholder="Enter student name..."></div>
+                    <button class="btn" onclick="loadUploadedPhotos()">🔍 Search Photos</button>
+                    <button class="btn" onclick="clearPhotoFilter()">Clear Filter</button>
+                </div>
+                <div id="uploadedPhotosContainer"><div class="info-message">Click "Search Photos" to view uploaded photos</div></div>
+            </div>
+        </div>
+        
+        <!-- TAB 5: Attendance Report -->
+        <div id="tab-reports" class="tab-content">
+            <div class="section">
+                <h3>📊 Attendance Report</h3>
+                <div class="date-row">
+                    <div class="date-group"><label>📅 Start Date</label><input type="date" id="startDate"></div>
+                    <div class="date-group"><label>📅 End Date</label><input type="date" id="endDate"></div>
+                    <button class="btn" onclick="loadReport()">📊 Generate Report</button>
+                </div>
+                <div class="search-bar"><input type="text" id="reportSearch" placeholder="🔍 Search by student name..." onkeyup="filterReportTable()"></div>
+                <div id="reportResult"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <button class="bottom-nav-btn" onclick="window.location.href='teacher-dashboard.html'">🏠 Home</button>
+        <button class="bottom-nav-btn" onclick="window.location.href='index.html'">🚪 Exit</button>
+    </div>
+
+    <script>
+        const teacher = JSON.parse(localStorage.getItem('teacher'));
+        if(!teacher) window.location.href = 'teacher-login.html';
+        
+        function goBack() {
+            window.location.href = 'index.html';
+        }
+        
+        let selectedFiles = [];
+        
+        function setDefaultDates() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('startDate').value = today;
+            document.getElementById('endDate').value = today;
+            document.getElementById('viewDate').value = today;
+            document.getElementById('photoUploadDate').value = today;
+            document.getElementById('manualAttendanceDate').value = today;
+        }
+        
+        function showTab(tabName, btn) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+            btn.classList.add('active');
+            if(tabName === 'logins') loadLoginHistory();
+            if(tabName === 'photos') loadUploadedPhotos();
+        }
+        
+        document.getElementById('photoClassTime').onchange = function() {
+            document.getElementById('customTimeDiv').style.display = this.value === 'custom' ? 'flex' : 'none';
+        };
+        
+        function getSelectedTime() {
+            const select = document.getElementById('photoClassTime');
+            if(select.value === 'custom') {
+                const customTime = document.getElementById('customTime').value;
+                return customTime ? customTime + ':00' : '09:00:00';
+            }
+            return select.value;
+        }
+        
+        const uploadArea = document.getElementById('uploadArea');
+        uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.classList.add('dragover'); });
+        uploadArea.addEventListener('dragleave', () => { uploadArea.classList.remove('dragover'); });
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            handleFileSelect(e.dataTransfer.files);
+        });
+        
+        function handleFileSelect(files) {
+            for(let i = 0; i < files.length; i++) {
+                if(files[i].type.startsWith('image/')) selectedFiles.push(files[i]);
+            }
+            updateFileList();
+        }
+        
+        function updateFileList() {
+            const container = document.getElementById('fileListContainer');
+            const processBtn = document.getElementById('processBtn');
+            if(selectedFiles.length === 0) {
+                container.innerHTML = '';
+                processBtn.disabled = true;
+                return;
+            }
+            let html = '';
+            selectedFiles.forEach((file, index) => {
+                html += `<div class="file-item"><span>📷 ${file.name}</span><button class="remove-file" onclick="removeFile(${index})">✗</button></div>`;
+            });
+            container.innerHTML = html;
+            processBtn.disabled = false;
+        }
+        
+        function removeFile(index) { selectedFiles.splice(index, 1); updateFileList(); }
+        
+        async function processAllPhotos() {
+            const date = document.getElementById('photoUploadDate').value;
+            const time = getSelectedTime();
+            if(!date) { alert('Please select a date'); return; }
+            if(selectedFiles.length === 0) { alert('Please select photos'); return; }
+            
+            const processBtn = document.getElementById('processBtn');
+            const progress = document.getElementById('progressContainer');
+            const fill = document.getElementById('progressFill');
+            const resultDiv = document.getElementById('batchResultContainer');
+            
+            processBtn.disabled = true;
+            progress.style.display = 'block';
+            resultDiv.innerHTML = '';
+            
+            let success = 0, fail = 0, results = [];
+            for(let i = 0; i < selectedFiles.length; i++) {
+                const percent = Math.round(((i+1)/selectedFiles.length)*100);
+                fill.style.width = `${percent}%`;
+                fill.innerText = `${percent}%`;
+                
+                const formData = new FormData();
+                formData.append('classroomPhoto', selectedFiles[i]);
+                formData.append('teacher_id', teacher.teacher_id);
+                formData.append('subject_id', teacher.subject_id);
+                formData.append('attendance_date', date);
+                formData.append('attendance_time', time);
+                
+                try {
+                    const res = await fetch('http://localhost:5000/api/teacher/process-classroom-photo', { method: 'POST', body: formData });
+                    const data = await res.json();
+                    if(data.success) { 
+                        success++; 
+                        results.push({ name: selectedFiles[i].name, status: 'success', msg: data.message, confidence: data.confidence });
+                    } else { 
+                        fail++; 
+                        results.push({ name: selectedFiles[i].name, status: 'error', msg: data.message }); 
+                    }
+                } catch(e) { 
+                    fail++; 
+                    results.push({ name: selectedFiles[i].name, status: 'error', msg: e.message }); 
+                }
+            }
+            
+            let html = `<div class="success-message">✅ ${success} success, ${fail} failed for ${new Date(date).toLocaleDateString()}</div>`;
+            results.forEach(r => {
+                const confidenceHtml = r.confidence ? ` (${r.confidence}% confidence)` : '';
+                html += `<div class="result-item ${r.status === 'success' ? 'result-success' : 'result-error'}"><strong>${r.name}</strong><br>${r.msg}${confidenceHtml}</div>`;
+            });
+            resultDiv.innerHTML = html;
+            setTimeout(() => { progress.style.display = 'none'; processBtn.disabled = false; }, 3000);
+            selectedFiles = []; updateFileList();
+            loadAttendanceByDate();
+            loadUploadedPhotos();
+        }
+        
+        async function loadSubject() {
+            try {
+                const res = await fetch(`http://localhost:5000/api/teacher/subject/${teacher.teacher_id}`);
+                const sub = await res.json();
+                if(sub) {
+                    document.getElementById('subjectName').innerText = sub.name;
+                    document.getElementById('subjectCode').innerText = sub.code;
+                    teacher.subject_id = sub.subject_id;
+                }
+            } catch(e) { console.error(e); }
+        }
+        
+        async function loadStudentsForDate() {
+            const date = document.getElementById('manualAttendanceDate').value;
+            if(!date) { alert('Please select a date'); return; }
+            try {
+                const res = await fetch(`http://localhost:5000/api/teacher/students/${teacher.subject_id}`);
+                const students = await res.json();
+                const container = document.getElementById('studentsList');
+                if(!students.length) { container.innerHTML = '<p>No students found</p>'; return; }
+                
+                const attRes = await fetch('http://localhost:5000/api/teacher/attendance-by-date', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ teacher_id: teacher.teacher_id, date: date })
+                });
+                const attendance = await attRes.json();
+                const attMap = {};
+                attendance.forEach(a => { attMap[a.student_id] = a; });
+                
+                let html = `<div class="info-message">📅 ${new Date(date).toLocaleDateString()}</div>`;
+                students.forEach(s => {
+                    const existing = attMap[s.student_id];
+                    let statusHtml = existing ? (existing.status === 'present' ? '<span class="present">✅ Present</span>' : '<span class="absent">❌ Absent</span>') : '<span>Not Marked</span>';
+                    html += `<div class="student-item"><div><strong>${s.name}</strong><br><small>${s.email}</small></div><div>${statusHtml}<button class="present-btn" onclick="markAttendanceForDate(${s.student_id}, 'present', '${date}')">✅ Present</button><button class="absent-btn" onclick="markAttendanceForDate(${s.student_id}, 'absent', '${date}')">❌ Absent</button></div></div>`;
+                });
+                container.innerHTML = html;
+            } catch(e) { document.getElementById('studentsList').innerHTML = '<div class="error-message">❌ Error loading students</div>'; }
+        }
+        
+        async function markAttendanceForDate(studentId, status, date) {
+            try {
+                const response = await fetch('http://localhost:5000/api/teacher/mark-attendance', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ teacher_id: teacher.teacher_id, student_id: studentId, subject_id: teacher.subject_id, status: status, attendance_date: date })
+                });
+                const data = await response.json();
+                if(data.success) { alert(`✅ ${data.message}`); loadStudentsForDate(); loadAttendanceByDate(); }
+                else { alert('❌ Error: ' + data.message); }
+            } catch(error) { alert('❌ Network error'); }
+        }
+        
+        function filterAttendanceTable() {
+            const search = document.getElementById('attendanceSearch').value.toLowerCase();
+            const rows = document.querySelectorAll('#dateAttendanceResult table tbody tr');
+            if(!rows.length) return;
+            rows.forEach(row => {
+                const name = row.cells[0]?.innerText.toLowerCase() || '';
+                row.style.display = search && !name.includes(search) ? 'none' : '';
+            });
+        }
+        
+        async function loadAttendanceByDate() {
+            const date = document.getElementById('viewDate').value;
+            if(!date) return alert('Select date');
+            try {
+                const res = await fetch('http://localhost:5000/api/teacher/attendance-by-date', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ teacher_id: teacher.teacher_id, date })
+                });
+                const data = await res.json();
+                const container = document.getElementById('dateAttendanceResult');
+                if(!data.length) { container.innerHTML = `<div class="info-message">📭 No records for ${new Date(date).toLocaleDateString()}</div>`; return; }
+                let table = `<div class="table-responsive"><table><thead><tr style="background:#27ae60;color:white;"><th>Student Name</th><th>Email</th><th>Status</th><th>Method</th><th>Time</th></tr></thead><tbody>`;
+                data.forEach(s => {
+                    const statusClass = s.status === 'present' ? 'present' : 'absent';
+                    const statusText = s.status === 'present' ? '✅ Present' : '❌ Absent';
+                    let timeText = s.created_at ? new Date(s.created_at).toLocaleTimeString() : '-';
+                    table += `<td><td style="font-weight:bold;">${s.name}</strong></td><td>${s.email}</td><td class="${statusClass}">${statusText}</td><td>${s.method || 'teacher'}</td><td class="time-badge">🕐 ${timeText}</td></tr>`;
+                });
+                table += `</tbody></table></div><div class="info-message">Total: ${data.length} records</div>`;
+                container.innerHTML = table;
+                filterAttendanceTable();
+            } catch(e) { container.innerHTML = '<div class="error-message">❌ Error loading attendance</div>'; }
+        }
+        
+        // Student Login History Functions
+        function filterLoginTable() {
+            const search = document.getElementById('loginSearch').value.toLowerCase();
+            const dateFilter = document.getElementById('loginDateFilter').value;
+            const today = new Date().toISOString().split('T')[0];
+            const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+            const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString().split('T')[0];
+            const rows = document.querySelectorAll('#loginHistoryTable tbody tr');
+            if(!rows.length) return;
+            rows.forEach(row => {
+                const name = row.cells[0]?.innerText.toLowerCase() || '';
+                const loginDate = row.cells[2]?.getAttribute('data-date') || '';
+                let show = true;
+                if(search && !name.includes(search)) show = false;
+                if(dateFilter !== 'all') {
+                    if(dateFilter === 'today' && loginDate !== today) show = false;
+                    if(dateFilter === 'yesterday' && loginDate !== yesterday) show = false;
+                    if(dateFilter === 'week' && loginDate < weekAgo) show = false;
+                }
+                row.style.display = show ? '' : 'none';
+            });
+        }
+        
+        async function loadLoginHistory() {
+            try {
+                const summaryRes = await fetch(`http://localhost:5000/api/student-login-summary/${teacher.teacher_id}`);
+                const summaryData = await summaryRes.json();
+                const summaryContainer = document.getElementById('loginSummaryContainer');
+                if(summaryData.length > 0) {
+                    let summaryHtml = '';
+                    summaryData.slice(0, 6).forEach(s => {
+                        summaryHtml += `<div style="background: white; padding: 15px; border-radius: 10px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1);"><div style="font-size: 24px; font-weight: bold; color: #27ae60;">${s.total_logins}</div><div style="font-size: 12px; color: #666;">${s.name}</div><div style="font-size: 10px; color: #999;">Last: ${s.last_login ? new Date(s.last_login).toLocaleDateString() : 'Never'}</div></div>`;
+                    });
+                    summaryContainer.innerHTML = summaryHtml;
+                } else { summaryContainer.innerHTML = '<div class="info-message">No login records yet</div>'; }
+                
+                const res = await fetch(`http://localhost:5000/api/student-login-history/${teacher.teacher_id}`);
+                const logins = await res.json();
+                const container = document.getElementById('loginHistoryResult');
+                if(!logins.length) { container.innerHTML = '<div class="info-message">📭 No login records found</div>'; return; }
+                let table = `<div class="table-responsive"><table id="loginHistoryTable" style="width:100%"><thead><tr style="background:#27ae60;color:white;"><th>👤 Student Name</th><th>📧 Email</th><th>📅 Date</th><th>🕐 Time</th><th>🌐 IP Address</th></tr></thead><tbody>`;
+                logins.forEach(l => {
+                    const loginDate = new Date(l.login_time).toLocaleDateString();
+                    const loginTime = new Date(l.login_time).toLocaleTimeString();
+                    const dateAttr = new Date(l.login_time).toISOString().split('T')[0];
+                    table += `<tr><td style="font-weight:bold;">${l.name}</strong></td><td>${l.email}</td><td data-date="${dateAttr}">📅 ${loginDate}</td><td>🕐 ${loginTime}</td><td><code>${l.ip_address || 'Unknown'}</code></td></tr>`;
+                });
+                table += `</tbody></table></div>`;
+                container.innerHTML = table;
+                filterLoginTable();
+            } catch(e) { document.getElementById('loginHistoryResult').innerHTML = '<div class="error-message">❌ Error loading login history</div>'; }
+        }
+        
+        async function loadUploadedPhotos() {
+            const filterDate = document.getElementById('photoFilterDate').value;
+            const searchTerm = document.getElementById('photoSearch').value.toLowerCase();
+            const container = document.getElementById('uploadedPhotosContainer');
+            container.innerHTML = '<div class="info-message">⏳ Loading photos...</div>';
+            try {
+                const response = await fetch('http://localhost:5000/api/teacher/photo-history', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ teacher_id: teacher.teacher_id, filter_date: filterDate, search: searchTerm })
+                });
+                const data = await response.json();
+                if(data.length === 0) { container.innerHTML = '<div class="info-message">📭 No uploaded photos found</div>'; return; }
+                let html = '<div style="display: grid; gap: 15px;">';
+                data.forEach(photo => {
+                    const date = new Date(photo.created_at).toLocaleDateString();
+                    const time = new Date(photo.created_at).toLocaleTimeString();
+                    const confidence = photo.confidence || 0;
+                    const confidenceClass = confidence >= 70 ? 'confidence-high' : (confidence >= 50 ? 'confidence-medium' : 'confidence-low');
+                    const statusClass = confidence >= 70 ? 'badge-success' : (confidence >= 50 ? 'badge-warning' : 'badge-danger');
+                    const statusText = confidence >= 70 ? '✅ Accepted' : (confidence >= 50 ? '⚠️ Low Confidence' : '❌ Rejected');
+                    html += `<div class="photo-card"><img src="http://localhost:5000${photo.photo_url}" class="photo-card-image" onerror="this.src='https://via.placeholder.com/150'"><div class="photo-card-details"><p><strong>📅 Date:</strong> ${date} at ${time}</p><p><strong>👨‍🏫 Teacher:</strong> ${photo.teacher_name}</p><p><strong>📚 Subject:</strong> ${photo.subject_name}</p><p><strong>👨‍🎓 Students:</strong> ${photo.present_count || 0} present, ${photo.absent_count || 0} absent</p><p><strong>✅ Detected:</strong> ${photo.present_students || 'None'}</p><p><strong>🎯 Confidence:</strong> <span class="photo-confidence ${confidenceClass}">${confidence}%</span> <span class="photo-badge ${statusClass}">${statusText}</span></p></div></div>`;
+                });
+                html += '</div>';
+                container.innerHTML = html;
+            } catch(error) { container.innerHTML = '<div class="error-message">❌ Error loading photos</div>'; }
+        }
+        
+        function clearPhotoFilter() {
+            document.getElementById('photoFilterDate').value = '';
+            document.getElementById('photoSearch').value = '';
+            loadUploadedPhotos();
+        }
+        
+        function filterReportTable() {
+            const search = document.getElementById('reportSearch').value.toLowerCase();
+            const rows = document.querySelectorAll('#reportResult table tbody tr');
+            if(!rows.length) return;
+            rows.forEach(row => {
+                const name = row.cells[1]?.innerText.toLowerCase() || '';
+                row.style.display = search && !name.includes(search) ? 'none' : '';
+            });
+        }
+        
+        async function loadReport() {
+            const start = document.getElementById('startDate').value, end = document.getElementById('endDate').value;
+            if(!start || !end) return alert('Select dates');
+            try {
+                const res = await fetch('http://localhost:5000/api/teacher/attendance-report', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ teacher_id: teacher.teacher_id, start_date: start, end_date: end })
+                });
+                const data = await res.json();
+                const container = document.getElementById('reportResult');
+                if(!data.length) { container.innerHTML = '<div class="info-message">📭 No records</div>'; return; }
+                let table = `<div class="table-responsive"><table style="width:100%"><thead><tr style="background:#27ae60;color:white;"><th>S.No</th><th>Student Name</th><th>Total Classes</th><th>Present</th><th>Attendance %</th><th>Status</th></tr></thead><tbody>`;
+                let sn = 1;
+                data.forEach(s => {
+                    const p = s.percentage || 0;
+                    let statusClass = '', statusText = '';
+                    if(p >= 75) { statusClass = 'present'; statusText = '✅ Good'; }
+                    else if(p >= 60) { statusClass = 'warning'; statusText = '⚠️ Needs Improvement'; }
+                    else { statusClass = 'absent'; statusText = '❌ Critical'; }
+                    table += `<tr><td style="text-align:center">${sn++}</td><td style="font-weight:bold;">${s.name}</strong></td><td style="text-align:center">${s.total_classes || 0}</td><td style="text-align:center;color:#27ae60">${s.present_count || 0}</td><td style="text-align:center;color:${p>=75?'#27ae60':(p>=60?'#f39c12':'#e74c3c')}">${p}%</td><td class="${statusClass}">${statusText}</td></td>`;
+                });
+                table += `</tbody>}</div><div class="info-message">Report from ${new Date(start).toLocaleDateString()} to ${new Date(end).toLocaleDateString()}</div>`;
+                container.innerHTML = table;
+                filterReportTable();
+            } catch(e) { container.innerHTML = '<div class="error-message">❌ Error</div>'; }
+        }
+        
+        function logout() { localStorage.removeItem('teacher'); window.location.href = 'index.html'; }
+        
+        setDefaultDates();
+        loadSubject();
+        loadAttendanceByDate();
+    </script>
+</body>
+</html>

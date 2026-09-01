@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Dashboard - Smart Attendance System</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f0f2f5;
+        }
+        .navbar {
+            background: linear-gradient(135deg, #f39c12 0%, #e74c3c 100%);
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .navbar h2 { font-size: 20px; }
+        .logout-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            padding: 8px 20px;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .stat-card h3 {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        .stat-card .number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #f39c12;
+        }
+        
+        .section {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .section h3 {
+            margin-bottom: 15px;
+            color: #333;
+            border-left: 4px solid #f39c12;
+            padding-left: 12px;
+        }
+        
+        .btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-danger {
+            background: #e74c3c;
+        }
+        .btn:hover {
+            opacity: 0.9;
+        }
+        
+        .filter-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            margin-bottom: 20px;
+        }
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .filter-group label {
+            font-size: 12px;
+            color: #666;
+            font-weight: bold;
+        }
+        .filter-group input, .filter-group select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        .table-responsive {
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background: #f39c12;
+            color: white;
+            position: sticky;
+            top: 0;
+        }
+        tr:hover {
+            background: #fef9e7;
+        }
+        .present { color: #27ae60; font-weight: bold; }
+        .absent { color: #e74c3c; font-weight: bold; }
+        .warning { color: #f39c12; font-weight: bold; }
+        
+        .student-name {
+            font-weight: bold;
+            color: #f39c12;
+            cursor: pointer;
+        }
+        .subject-breakdown {
+            background: #fafafa;
+        }
+        .photo-preview {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .photo-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 11px;
+        }
+        .badge-pending { background: #ffc107; color: #856404; }
+        .badge-approved { background: #d4edda; color: #155724; }
+        .badge-rejected { background: #f8d7da; color: #721c24; }
+        
+        .branch-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .branch-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            border-left: 3px solid #f39c12;
+        }
+        .branch-card h4 {
+            color: #f39c12;
+            margin-bottom: 8px;
+        }
+        .branch-card .count {
+            font-size: 28px;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 768px) {
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            th, td {
+                padding: 8px;
+                font-size: 12px;
+            }
+            .filter-row {
+                flex-direction: column;
+            }
+            .filter-group {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h2>📊 Admin Dashboard - Smart Attendance System</h2>
+        <button class="logout-btn" onclick="logout()">🚪 Logout</button>
+    </div>
+    <div class="container">
+        <!-- Stats Cards -->
+        <div class="stats">
+            <div class="stat-card">
+                <h3>👨‍🎓 Total Students</h3>
+                <div class="number" id="totalStudents">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>📚 Total Subjects</h3>
+                <div class="number" id="totalSubjects">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>✅ Total Classes</h3>
+                <div class="number" id="totalClasses">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>📖 Overall Attendance</h3>
+                <div class="number" id="overallAttendance">0%</div>
+            </div>
+        </div>
+        
+        <!-- Branch Statistics -->
+        <div class="section">
+            <h3>🏛️ Branch/Class wise Statistics</h3>
+            <div id="branchStatsContainer">
+                <p>⏳ Loading branch statistics...</p>
+            </div>
+        </div>
+        
+        <!-- Pending Student Photo Verifications -->
+        <div class="section">
+            <h3>📸 Pending Student Photo Verifications</h3>
+            <div id="pendingPhotosContainer">
+                <p>⏳ Loading pending photo verifications...</p>
+            </div>
+        </div>
+        
+        <!-- Pending Teacher Verifications -->
+        <div class="section">
+            <h3>👨‍🏫 Pending Teacher Verifications</h3>
+            <div id="pendingTeachersContainer">
+                <p>⏳ Loading pending teacher verifications...</p>
+            </div>
+        </div>
+        
+        <!-- Date-wise Report Section -->
+        <div class="section">
+            <h3>📊 Generate Attendance Report by Date</h3>
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label>📅 Start Date</label>
+                    <input type="date" id="reportStartDate">
+                </div>
+                <div class="filter-group">
+                    <label>📅 End Date</label>
+                    <input type="date" id="reportEndDate">
+                </div>
+                <div class="filter-group">
+                    <label>📚 Subject (Optional)</label>
+                    <select id="reportSubject">
+                        <option value="">All Subjects</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>🏛️ Branch (Optional)</label>
+                    <select id="reportBranch">
+                        <option value="">All Branches</option>
+                    </select>
+                </div>
+                <button class="btn" onclick="generateReport()">📊 Generate Report</button>
+            </div>
+            <div id="reportResult" style="margin-top: 20px;"></div>
+        </div>
+        
+        <!-- Today's Attendance -->
+        <div class="section">
+            <h3>📋 Today's Attendance (<span id="todayDate"></span>)</h3>
+            <div id="todayAttendance">⏳ Loading...</div>
+        </div>
+        
+        <!-- Student-wise Detailed Attendance -->
+        <div class="section">
+            <h3>👨‍🎓 Student-wise Detailed Attendance</h3>
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label>🏛️ Filter by Branch</label>
+                    <select id="studentBranchFilter" onchange="filterStudentsByBranch()">
+                        <option value="all">All Branches</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>🔍 Search Student</label>
+                    <input type="text" id="studentSearch" placeholder="Search by name or email..." onkeyup="filterStudentsTable()">
+                </div>
+            </div>
+            <div id="studentsDetailedAttendance">⏳ Loading...</div>
+        </div>
+    </div>
+
+    <script>
+        // Check if admin is logged in
+        if(!localStorage.getItem('admin')) {
+            window.location.href = 'admin-login.html';
+        }
+        
+        document.getElementById('todayDate').innerText = new Date().toLocaleDateString();
+        
+        let allStudentsData = [];
+        
+        function setDefaultDates() {
+            const today = new Date();
+            const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+            document.getElementById('reportStartDate').value = startOfMonth.toISOString().split('T')[0];
+            document.getElementById('reportEndDate').value = today.toISOString().split('T')[0];
+        }
+        
+        // ============ BRANCH STATISTICS ============
+        async function loadBranchStatistics() {
+            try {
+                const response = await fetch('http://localhost:5000/api/branch-statistics');
+                const branches = await response.json();
+                const container = document.getElementById('branchStatsContainer');
+                
+                if (branches.length === 0) {
+                    container.innerHTML = '<p>No branches found.</p>';
+                    return;
+                }
+                
+                let html = '<div class="branch-stats">';
+                branches.forEach(b => {
+                    html += `
+                        <div class="branch-card">
+                            <h4>${b.name} (${b.code})</h4>
+                            <div class="count">${b.total_students || 0}</div>
+                            <div style="font-size: 12px;">Students</div>
+                            <div style="font-size: 11px; margin-top: 5px;">
+                                <span style="color:#27ae60;">✅ ${b.approved_students || 0}</span> | 
+                                <span style="color:#f39c12;">⏳ ${b.pending_students || 0}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                container.innerHTML = html;
+            } catch(e) {
+                console.error(e);
+                document.getElementById('branchStatsContainer').innerHTML = '<p>❌ Error loading branch statistics</p>';
+            }
+        }
+        
+        // ============ LOAD BRANCHES FOR FILTERS ============
+        async function loadBranchesForFilters() {
+            try {
+                const response = await fetch('http://localhost:5000/api/branches');
+                const branches = await response.json();
+                
+                const branchFilter = document.getElementById('reportBranch');
+                const studentBranchFilter = document.getElementById('studentBranchFilter');
+                
+                branches.forEach(branch => {
+                    const option1 = document.createElement('option');
+                    option1.value = branch.branch_id;
+                    option1.textContent = `${branch.name} (${branch.code})`;
+                    branchFilter.appendChild(option1);
+                    
+                    const option2 = document.createElement('option');
+                    option2.value = branch.branch_id;
+                    option2.textContent = `${branch.name} (${branch.code})`;
+                    studentBranchFilter.appendChild(option2);
+                });
+            } catch(e) {
+                console.error(e);
+            }
+        }
+        
+        // ============ PENDING PHOTOS ============
+        async function loadPendingPhotos() {
+            try {
+                const response = await fetch('http://localhost:5000/api/admin/pending-photos');
+                const students = await response.json();
+                const container = document.getElementById('pendingPhotosContainer');
+                
+                if (students.length === 0) {
+                    container.innerHTML = '<p>✅ No pending photo verifications.</p>';
+                    return;
+                }
+                
+                let table = `
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr><th>Student Name</th><th>Email</th><th>Photo</th><th>Uploaded Date</th><th>Action</th></tr>
+                            </thead>
+                            <tbody>
+                `;
+                
+                for (const student of students) {
+                    table += `
+                        <tr>
+                            <td><strong>${student.name}</strong></td>
+                            <td>${student.email}</td>
+                            <td><img src="http://localhost:5000${student.photo_url}" class="photo-preview" onerror="this.src='https://via.placeholder.com/40'"></td>
+                            <td>${new Date(student.photo_uploaded_at).toLocaleDateString()}</td>
+                            <td>
+                                <button class="btn" style="background:#27ae60; margin-right:5px;" onclick="verifyPhoto(${student.student_id}, 'approve')">✅ Approve</button>
+                                <button class="btn btn-danger" onclick="verifyPhoto(${student.student_id}, 'reject')">❌ Reject</button>
+                            </td>
+                        </tr>
+                    `;
+                }
+                table += `</tbody></div>`;
+                container.innerHTML = table;
+            } catch(e) {
+                console.error(e);
+                container.innerHTML = '<p>❌ Error loading pending photos</p>';
+            }
+        }
+        
+        async function verifyPhoto(studentId, action) {
+            const response = await fetch('http://localhost:5000/api/admin/verify-photo', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ student_id: studentId, action: action })
+            });
+            const data = await response.json();
+            if (data.success) {
+                alert(`✅ Photo ${action}d successfully!`);
+                loadPendingPhotos();
+                loadStudentAttendance();
+                loadBranchStatistics();
+            } else {
+                alert('❌ Error: ' + data.error);
+            }
+        }
+        
+        // ============ PENDING TEACHERS ============
+        async function loadPendingTeachers() {
+            try {
+                const response = await fetch('http://localhost:5000/api/admin/pending-teachers');
+                const teachers = await response.json();
+                const container = document.getElementById('pendingTeachersContainer');
+                
+                if (teachers.length === 0) {
+                    container.innerHTML = '<p>✅ No pending teacher verifications.</p>';
+                    return;
+                }
+                
+                let table = `<div class="table-responsive"><table><thead><tr><th>Teacher Name</th><th>Email</th><th>Subject</th><th>Action</th></tr></thead><tbody>`;
+                for (const teacher of teachers) {
+                    table += `
+                        <tr>
+                            <td><strong>${teacher.name}</strong></td>
+                            <td>${teacher.email}</td>
+                            <td>${teacher.subject_name} (${teacher.subject_code})</td>
+                            <td>
+                                <button class="btn" style="background:#27ae60; margin-right:5px;" onclick="verifyTeacher(${teacher.teacher_id}, 'approve')">✅ Approve</button>
+                                <button class="btn btn-danger" onclick="verifyTeacher(${teacher.teacher_id}, 'reject')">❌ Reject</button>
+                            </td>
+                        </tr>
+                    `;
+                }
+                table += `</tbody></div>`;
+                container.innerHTML = table;
+            } catch(e) {
+                console.error(e);
+                container.innerHTML = '<p>✅ No pending teacher verifications.</p>';
+            }
+        }
+        
+        async function verifyTeacher(teacherId, action) {
+            const response = await fetch('http://localhost:5000/api/admin/verify-teacher', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ teacher_id: teacherId, action: action })
+            });
+            const data = await response.json();
+            if (data.success) {
+                alert(`✅ Teacher ${action}d successfully!`);
+                loadPendingTeachers();
+            } else {
+                alert('❌ Error: ' + data.error);
+            }
+        }
+        
+        // ============ REPORT FUNCTIONS ============
+        async function loadSubjectsForReport() {
+            try {
+                const response = await fetch('http://localhost:5000/api/subjects');
+                const subjects = await response.json();
+                const select = document.getElementById('reportSubject');
+                subjects.forEach(subject => {
+                    const option = document.createElement('option');
+                    option.value = subject.subject_id;
+                    option.textContent = subject.name;
+                    select.appendChild(option);
+                });
+            } catch(e) { console.error(e); }
+        }
+        
+        async function generateReport() {
+            const startDate = document.getElementById('reportStartDate').value;
+            const endDate = document.getElementById('reportEndDate').value;
+            const subjectId = document.getElementById('reportSubject').value;
+            const branchId = document.getElementById('reportBranch').value;
+            
+            if (!startDate || !endDate) {
+                alert('Please select both dates');
+                return;
+            }
+            
+            try {
+                const response = await fetch('http://localhost:5000/api/admin/attendance-report', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        start_date: startDate,
+                        end_date: endDate,
+                        subject_id: subjectId || null,
+                        branch_id: branchId || null
+                    })
+                });
+                const data = await response.json();
+                displayReport(data);
+            } catch(e) {
+                document.getElementById('reportResult').innerHTML = '<p style="color:red;">❌ Error generating report</p>';
+            }
+        }
+        
+        function displayReport(data) {
+            const container = document.getElementById('reportResult');
+            if (data.length === 0) {
+                container.innerHTML = '<p>📭 No attendance records found.</p>';
+                return;
+            }
+            let table = `<div class="table-responsive"><table><thead><tr><th>S.No</th><th>Student</th><th>Subject</th><th>Date</th><th>Status</th><th>Method</th></tr></thead><tbody>`;
+            let sn = 1;
+            data.forEach(record => {
+                const statusClass = record.status === 'present' ? 'present' : 'absent';
+                const statusText = record.status === 'present' ? '✅ Present' : '❌ Absent';
+                table += `<tr><td>${sn++}</td><td>${record.student_name}</td><td>${record.subject_name}</td><td>${new Date(record.date).toLocaleDateString()}</td><td class="${statusClass}">${statusText}</td><td>${record.method || 'teacher'}</td></tr>`;
+            });
+            table += `</tbody></div>`;
+            container.innerHTML = table;
+        }
+        
+        // ============ TODAY'S ATTENDANCE ============
+        async function loadTodayAttendance() {
+            try {
+                const response = await fetch('http://localhost:5000/api/admin/today-attendance');
+                const attendance = await response.json();
+                const container = document.getElementById('todayAttendance');
+                if (attendance.length === 0) {
+                    container.innerHTML = '<p>📭 No attendance marked today.</p>';
+                    return;
+                }
+                let table = `<div class="table-responsive"><table><thead><tr><th>Student</th><th>Subject</th><th>Status</th><th>Method</th><th>Time</th></tr></thead><tbody>`;
+                attendance.forEach(a => {
+                    const timeText = a.created_at ? new Date(a.created_at).toLocaleTimeString() : '-';
+                    table += `<tr><td>${a.name}</td><td>${a.subject}</td><td class="${a.status}">${a.status.toUpperCase()}</td><td>${a.method}</td><td>${timeText}</td></tr>`;
+                });
+                table += `</tbody></div>`;
+                container.innerHTML = table;
+            } catch(e) { container.innerHTML = '<p>❌ Error loading data</p>'; }
+        }
+        
+        // ============ STUDENT ATTENDANCE ============
+        async function loadStudentAttendance() {
+            try {
+                const studentsRes = await fetch('http://localhost:5000/api/admin/students');
+                const students = await studentsRes.json();
+                const subjectsRes = await fetch('http://localhost:5000/api/subjects');
+                const subjects = await subjectsRes.json();
+                const branchesRes = await fetch('http://localhost:5000/api/branches');
+                const branches = await branchesRes.json();
+                
+                document.getElementById('totalStudents').innerText = students.length;
+                document.getElementById('totalSubjects').innerText = subjects.length;
+                
+                let totalClassesOverall = 0;
+                let totalPresentOverall = 0;
+                let studentsData = [];
+                
+                for (const student of students) {
+                    const attRes = await fetch(`http://localhost:5000/api/attendance-percentage/${student.student_id}`);
+                    const attendanceData = await attRes.json();
+                    const branch = branches.find(b => b.branch_id === student.branch_id);
+                    
+                    let studentTotalClasses = 0;
+                    let studentPresentCount = 0;
+                    let subjectDetails = [];
+                    
+                    for (const subject of subjects) {
+                        const attInfo = attendanceData.find(a => a.subject_id === subject.subject_id) || { total_classes: 0, present_count: 0, percentage: 0 };
+                        studentTotalClasses += Number(attInfo.total_classes || 0);
+                        studentPresentCount += Number(attInfo.present_count || 0);
+                        subjectDetails.push({
+                            name: subject.name,
+                            code: subject.code,
+                            total: attInfo.total_classes || 0,
+                            present: attInfo.present_count || 0,
+                            absent: (attInfo.total_classes || 0) - (attInfo.present_count || 0),
+                            percent: attInfo.percentage || 0
+                        });
+                    }
+                    
+                    totalClassesOverall += studentTotalClasses;
+                    totalPresentOverall += studentPresentCount;
+                    
+                    studentsData.push({
+                        id: student.student_id,
+                        name: student.name,
+                        email: student.email,
+                        photo_url: student.photo_url,
+                        photo_status: student.photo_status,
+                        branch_name: branch ? branch.name : 'N/A',
+                        branch_code: branch ? branch.code : 'N/A',
+                        total: studentTotalClasses,
+                        present: studentPresentCount,
+                        absent: studentTotalClasses - studentPresentCount,
+                        percent: studentTotalClasses > 0 ? ((studentPresentCount / studentTotalClasses) * 100).toFixed(2) : 0,
+                        subjects: subjectDetails
+                    });
+                }
+                
+                document.getElementById('totalClasses').innerText = totalClassesOverall;
+                const overallPercent = totalClassesOverall > 0 ? ((totalPresentOverall / totalClassesOverall) * 100).toFixed(2) : 0;
+                document.getElementById('overallAttendance').innerText = overallPercent + '%';
+                
+                allStudentsData = studentsData;
+                displayStudentsTable(studentsData);
+                
+            } catch(e) {
+                console.error(e);
+                document.getElementById('studentsDetailedAttendance').innerHTML = '<p>❌ Error loading data</p>';
+            }
+        }
+        
+        function displayStudentsTable(studentsData) {
+            const container = document.getElementById('studentsDetailedAttendance');
+            if (studentsData.length === 0) {
+                container.innerHTML = '<p>No students registered yet.</p>';
+                return;
+            }
+            
+            let table = `<div class="table-responsive"><table id="studentsTable"><thead><tr>
+                <th>👤 Student Name</th><th>📧 Email</th><th>🏛️ Branch</th><th>📸 Photo</th><th>Photo Status</th>
+                <th>📊 Total</th><th>✅ Present</th><th>❌ Absent</th><th>📈 %</th><th>Status</th>
+            </tr></thead><tbody>`;
+            
+            for (const student of studentsData) {
+                let statusClass = '', statusText = '';
+                if (student.percent >= 75) { statusClass = 'present'; statusText = '✅ Good'; }
+                else if (student.percent >= 60) { statusClass = 'warning'; statusText = '⚠️ Needs Improvement'; }
+                else { statusClass = 'absent'; statusText = '❌ Critical'; }
+                
+                let photoBadge = '';
+                if (student.photo_status === 'approved') photoBadge = '<span class="photo-badge badge-approved">✅ Verified</span>';
+                else if (student.photo_status === 'pending') photoBadge = '<span class="photo-badge badge-pending">⏳ Pending</span>';
+                else photoBadge = '<span class="photo-badge badge-pending">📷 No Photo</span>';
+                
+                const photoHtml = student.photo_url ? `<img src="http://localhost:5000${student.photo_url}" class="photo-preview" onerror="this.src='https://via.placeholder.com/40'">` : '<div style="width:40px;height:40px;background:#ddd;border-radius:50%;display:flex;align-items:center;justify-content:center;">📷</div>';
+                
+                table += `<tr onclick="toggleStudentDetails(${student.id})" style="cursor:pointer;">
+                    <td class="student-name">📋 ${student.name}</td>
+                    <td>${student.email}</td>
+                    <td>${student.branch_name} (${student.branch_code})</td>
+                    <td>${photoHtml}</td>
+                    <td>${photoBadge}</td>
+                    <td style="text-align:center"><strong>${student.total}</strong></td>
+                    <td style="text-align:center;color:#27ae60;"><strong>${student.present}</strong></td>
+                    <td style="text-align:center;color:#e74c3c;"><strong>${student.absent}</strong></td>
+                    <td style="text-align:center;font-weight:bold;color: ${student.percent >= 75 ? '#27ae60' : (student.percent >= 60 ? '#f39c12' : '#e74c3c')}">${student.percent}%</td>
+                    <td class="${statusClass}">${statusText}</td>
+                </tr>
+                <tr id="subjects-${student.id}" style="display:none;" class="subject-breakdown">
+                    <td colspan="10"><div style="padding:15px; background:#fef9e7;"><strong>📚 Subject-wise Breakdown:</strong>
+                    <div class="table-responsive"><table style="margin-top:10px;"><thead><tr style="background:#f39c12;"><th>Subject</th><th>Code</th><th>Classes</th><th>Present</th><th>Absent</th><th>%</th></tr></thead><tbody>`;
+                
+                student.subjects.forEach(subj => {
+                    let subjClass = subj.percent >= 75 ? 'present' : (subj.percent >= 60 ? 'warning' : 'absent');
+                    table += `<tr><td>${subj.name}</td><td>${subj.code}</td><td style="text-align:center">${subj.total}</td><td style="text-align:center;color:#27ae60;">${subj.present}</td><td style="text-align:center;color:#e74c3c;">${subj.absent}</td><td class="${subjClass}" style="text-align:center">${subj.percent}%</td></tr>`;
+                });
+                table += `</tbody></table></div></div></td></tr>`;
+            }
+            table += `</tbody></div>`;
+            container.innerHTML = table;
+        }
+        
+        function filterStudentsByBranch() {
+            const branchId = document.getElementById('studentBranchFilter').value;
+            if (branchId === 'all') {
+                displayStudentsTable(allStudentsData);
+            } else {
+                const filtered = allStudentsData.filter(s => {
+                    const branch = document.getElementById('studentBranchFilter').options[document.getElementById('studentBranchFilter').selectedIndex].text;
+                    return s.branch_name === branch.split(' ')[0];
+                });
+                displayStudentsTable(filtered);
+            }
+        }
+        
+        function filterStudentsTable() {
+            const search = document.getElementById('studentSearch').value.toLowerCase();
+            const filtered = allStudentsData.filter(s => s.name.toLowerCase().includes(search) || s.email.toLowerCase().includes(search));
+            displayStudentsTable(filtered);
+        }
+        
+        function toggleStudentDetails(studentId) {
+            const row = document.getElementById(`subjects-${studentId}`);
+            row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
+        }
+        
+        function logout() { localStorage.removeItem('admin'); window.location.href = 'index.html'; }
+        
+        setDefaultDates();
+        loadSubjectsForReport();
+        loadBranchesForFilters();
+        loadBranchStatistics();
+        loadPendingPhotos();
+        loadPendingTeachers();
+        loadTodayAttendance();
+        loadStudentAttendance();
+    </script>
+</body>
+</html>

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Smart Student Attendance System</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+            width: 450px;
+            max-width: 100%;
+        }
+        .logo { font-size: 60px; margin-bottom: 10px; }
+        h1 { color: #333; margin-bottom: 10px; font-size: 24px; }
+        .subtitle { color: #666; margin-bottom: 30px; font-size: 14px; }
+        .features {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+        .feature-badge {
+            background: #f0f2f5;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            color: #666;
+        }
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            margin: 12px 0;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-student {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-teacher {
+            background: linear-gradient(135deg, #27ae60 0%, #219a52 100%);
+            color: white;
+        }
+        .btn-admin {
+            background: linear-gradient(135deg, #f39c12 0%, #e74c3c 100%);
+            color: white;
+        }
+        .btn:hover { transform: translateY(-2px); }
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 20px 0;
+            color: #999;
+            font-size: 12px;
+        }
+        .divider-line { flex: 1; height: 1px; background: #ddd; }
+        .divider-text { padding: 0 10px; }
+        .footer { margin-top: 25px; font-size: 11px; color: #999; }
+        .footer a { color: #667eea; text-decoration: none; }
+        @media (max-width: 480px) {
+            .container { padding: 25px; }
+            h1 { font-size: 20px; }
+            .btn { padding: 12px; font-size: 14px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">📚</div>
+        <h1>Smart Student Attendance System</h1>
+        <p class="subtitle">Face Recognition Based Attendance System</p>
+        
+        <div class="features">
+            <span class="feature-badge">📸 Face Recognition</span>
+            <span class="feature-badge">👨‍🏫 Teacher Login</span>
+            <span class="feature-badge">📊 Reports</span>
+            <span class="feature-badge">📧 Email Alerts</span>
+        </div>
+        
+        <button class="btn btn-student" onclick="window.location.href='student-login.html'">
+            👨‍🎓 Student Login
+        </button>
+        
+        <button class="btn btn-teacher" onclick="window.location.href='teacher-login.html'">
+            👨‍🏫 Teacher Login
+        </button>
+        
+        <button class="btn btn-admin" onclick="window.location.href='admin-login.html'">
+            👨‍💼 Admin Login
+        </button>
+        
+        <div class="divider">
+            <div class="divider-line"></div>
+            <div class="divider-text">New Student?</div>
+            <div class="divider-line"></div>
+        </div>
+        
+        <button class="btn btn-student" onclick="window.location.href='student-signup.html'" style="background: linear-gradient(135deg, #27ae60 0%, #219a52 100%);">
+            📝 Create New Account
+        </button>
+        
+        <div class="footer">
+            <p>© 2025 Smart Attendance System | <a href="#">Help</a> | <a href="#">Support</a></p>
+        </div>
+    </div>
+</body>
+</html>
