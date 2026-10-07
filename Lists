@@ -1,3 +1,7 @@
+           # LISTS ARE ORDERED AND MUTABLE#
+
+
+
 '''fruits = ["Apple","Banana","Mango","Orange"]
 
 print(fruits[0])

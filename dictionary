@@ -1,0 +1,47 @@
+# dictionary = set of key and values pairs
+# dict are unordered and mutable
+
+
+'''birthday={
+    "mailari": "24-03-2006",
+    "virat": "05-10-1988",
+    "beera": "05-06-2010"
+}
+print(type(birthday))
+print(birthday["mailari"])
+print(birthday.get("manu","none")) # default - check weither the key is thier in the dict
+birthday["manu"]= "02-10-2004" # addind
+birthday["beera"]= "5-6-2011"  # upadate
+X = birthday.pop("virat")   #pop
+print(X)
+
+print(birthday.keys()) # printing keys in the dict
+print(birthday.values()) # printing values
+
+  # addind two dict
+wishes={"ramesh": "15-07-2006"}
+birthday.update(wishes)
+print(birthday)'''
+
+
+'''d={12:123,
+    "df":1223}
+print(d)'''
+
+    #list of dict's 
+     
+
+
+item1={
+    "name":"sugar",
+    "weight": 3,
+    "price": 24
+}
+
+item2={
+    "name":"milk",
+    "weight": 1,
+    "price": 4
+}
+
+print(f"Total weight: {item1["weight"] + item2["weight"]}kg")

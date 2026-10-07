@@ -1,0 +1,7 @@
+git status
+
+git add .
+
+git commit -m "Updated project files"
+
+git push
