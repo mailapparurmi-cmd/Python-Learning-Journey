@@ -1,3 +1,6 @@
+#REPEATEDLY EXECUTE  BLOCK OF CODE UNTIL CONTION IS TRUE
+#CONTINUE--- skip the iteration
+#BREAK---- come out  from the loop
 '''
 i=2
 while i<=6:
@@ -44,10 +47,44 @@ while number>=1:
     number=number-1'''
 
 
-number=int(input("Enter number"))
+'''number=int(input("Enter number: "))
 while number>=1:
     print(number)
-    number=number-1
+    number=number-1'''
+
+
+'''is_false=True
+i=1
+while is_false and i<=100:
+    print(f"attempt{i}")
+    i+=1'''
+
+#FOR EVEN ONLY
+'''is_false=True
+i=1
+while is_false:
+    if  i%2!=0:
+        i+=1
+        continue
+    print(f"attempt{i}")
+    i+=1
+    if i>100:
+        break
+
+print("oo my god")'''
+
+
+pin=1234
+trial=1
+while trial<=3:
+    new_pin=int(input(f"trials{trial} |enter the pin: "))
+    trial +=1
+    if new_pin==pin:
+        print("correct")
+        break
+    else:
+        print("incorrect")   
+
 
 
 
